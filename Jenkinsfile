@@ -37,7 +37,7 @@ pipeline {
         stage('Build') {
             steps {
                 sh '''
-                    echo "Validating SQL init scripts..."
+                    echo "Validating SQL init scripts"
                     echo "Build stage complete"
                 '''
             }
