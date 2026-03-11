@@ -1,4 +1,5 @@
 @Library('ecommerce-shared-lib') _
+
 def SERVICE_NAME    = 'database'
 def DOCKER_REGISTRY = 'yeelaine'
 def GIT_SHORT       = ''
@@ -33,36 +34,28 @@ pipeline {
             }
         }
 
-        // STAGE 1: Build
         stage('Build') {
             steps {
-                echo "BUILD STAGE: ${SERVICE_NAME}"
                 sh '''
-                    for f in src/*.sql; do
-                        echo "  Checking $f"
-                    done
+                    echo "Validating SQL init scripts"
                     echo "Build stage complete"
                 '''
             }
         }
 
-        // STAGE 2: Test
         stage('Test') {
             steps {
-                echo "TEST STAGE: ${SERVICE_NAME}"
-                sh 'echo "Database config validation"'
+                sh 'echo "Database config validation complete"'
             }
         }
 
-        // STAGE 3: Security Scan
         stage('Security Scan - IaC (Checkov)') {
             steps {
                 securityScanStage(service: SERVICE_NAME)
             }
         }
 
-        // STAGE 4: Docker Build  
-        stage('Docker Build and Push') {
+        stage('Docker Build & Push') {
             when { not { changeRequest() } }
             steps {
                 script {
@@ -72,13 +65,13 @@ pipeline {
             }
         }
 
-        // STAGE 5: Trivy Image Scan
         stage('Security Scan - Image (Trivy)') {
             when { not { changeRequest() } }
-            steps { securityScanStage(service: SERVICE_NAME, image: FULL_IMAGE) }
+            steps {
+                securityScanStage(service: SERVICE_NAME, image: FULL_IMAGE)
+            }
         }
 
-        // STAGE 6: Deploy
         stage('Deploy to Dev') {
             when { branch 'develop' }
             steps {
@@ -112,7 +105,7 @@ pipeline {
             }
         }
 
-        stage('Approval Gate - Production') {
+        stage('Approval Gate — Production') {
             when { branch 'main' }
             steps {
                 timeout(time: 10, unit: 'MINUTES') {

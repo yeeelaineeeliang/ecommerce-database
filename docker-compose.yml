@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  database:
+    image: yeelaine/ecommerce-database:latest
+    container_name: ecommerce-db
+    environment:
+      POSTGRES_DB: ecommerce
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  product-service:
+    image: yeelaine/ecommerce-product-service:latest
+    container_name: ecommerce-product
+    environment:
+      DB_HOST: database
+      DB_NAME: ecommerce
+      DB_USER: postgres
+      DB_PASSWORD: password
+      PORT: 3001
+    ports:
+      - "3001:3001"
+    depends_on:
+      database:
+        condition: service_healthy
+
+  order-service:
+    image: yeelaine/ecommerce-order-service:latest
+    container_name: ecommerce-order
+    environment:
+      DB_HOST: database
+      DB_NAME: ecommerce
+      DB_USER: postgres
+      DB_PASSWORD: password
+      PORT: 3002
+    ports:
+      - "3002:3002"
+    depends_on:
+      database:
+        condition: service_healthy
+
+  frontend:
+    image: yeelaine/ecommerce-frontend:latest
+    container_name: ecommerce-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - product-service
+      - order-service
+
+volumes:
+  postgres_data:
