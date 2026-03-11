@@ -36,3 +36,5 @@ Each microservice is independently deployable — the frontend shouldn't need to
 **Why branch protection rules?**
 Even working solo, branch protection forces me to go through PRs which creates a clear commit history and makes it obvious when and why changes were made. It also mirrors real-world team practices where no one pushes directly to main.# trigger
 # retrigger
+# retrigger
+# rretrigger
