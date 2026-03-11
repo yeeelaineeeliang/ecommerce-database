@@ -78,32 +78,28 @@ pipeline {
                 script {
                     try {
                         sh '''
-                            kubectl apply -f k8s/persistentvolume.yaml  -n dev
-                            kubectl apply -f k8s/pvc.yaml               -n dev
-                            kubectl apply -f k8s/configmap.yaml         -n dev
-                            kubectl apply -f k8s/secret.yaml            -n dev
-                            kubectl apply -f k8s/statefulset.yaml       -n dev
-                            kubectl apply -f k8s/service-clusterip.yaml -n dev
-                            kubectl rollout status statefulset/database -n dev --timeout=60s
+                            kubectl apply -f k8s/base/ -n dev --context=ecommerce-dev
+                            kubectl apply -f k8s/dev/ -n dev --context=ecommerce-dev
+                            kubectl rollout status deployment/postgres -n dev --context=ecommerce-dev --timeout=120s
                         '''
                     } catch (err) {
-                        echo "WARNING: K8s manifests not ready yet - skipping deploy"
+                        echo "WARNING: K8s deploy issue - ${err}"
                     }
                 }
             }
         }
-
         stage('Deploy to Staging') {
             when { expression { env.BRANCH_NAME ==~ /release\/.*/ } }
             steps {
                 script {
                     try {
                         sh '''
-                            kubectl apply -f k8s/ -n staging
-                            kubectl rollout status statefulset/database -n staging --timeout=60s
+                            kubectl apply -f k8s/base/ -n staging --context=ecommerce-staging
+                            kubectl apply -f k8s/staging/ -n staging --context=ecommerce-staging
+                            kubectl rollout status deployment/postgres -n staging --context=ecommerce-staging --timeout=120s
                         '''
                     } catch (err) {
-                        echo "WARNING: K8s manifests not ready yet - skipping deploy"
+                        echo "WARNING: K8s deploy issue - ${err}"
                     }
                 }
             }
@@ -126,16 +122,23 @@ pipeline {
                 script {
                     try {
                         sh '''
-                            kubectl apply -f k8s/ -n prod
-                            kubectl rollout status statefulset/database -n prod --timeout=60s
+                            kubectl apply -f k8s/base/ -n prod --context=ecommerce-prod
+                            kubectl apply -f k8s/prod/ -n prod --context=ecommerce-prod
+                            kubectl rollout status deployment/postgres -n prod --context=ecommerce-prod --timeout=120s
                         '''
                     } catch (err) {
-                        echo "WARNING: K8s manifests not ready yet - skipping deploy"
+                        echo "WARNING: K8s deploy issue - ${err}"
                     }
                 }
             }
         }
 
+        stage('Update Monitoring Stack') {
+            when { branch 'main' }
+            steps {
+                monitoringDeploy(namespace: 'monitoring')
+            }
+        }
     }
 
     post {
