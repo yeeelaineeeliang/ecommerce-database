@@ -113,6 +113,7 @@ pipeline {
                         echo "WARNING: K8s manifests not ready yet - skipping deploy"
                     }
                 }
+            }
         }
 
         stage('Approval Gate - Production') {
