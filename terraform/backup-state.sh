@@ -6,7 +6,6 @@ BACKUP_DIR="$HOME/.terraform-state-backups/ecommerce"
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 DEST="$BACKUP_DIR/$TIMESTAMP"
 
-echo "=== Terraform State Backup ==="
 echo "Destination: $DEST"
 
 mkdir -p "$DEST"
