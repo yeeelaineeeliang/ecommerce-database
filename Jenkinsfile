@@ -36,9 +36,8 @@ pipeline {
 
         stage('Build') {
             steps {
-                echo "=== BUILD STAGE: ${SERVICE_NAME} ==="
                 sh '''
-                    echo "Validating SQL init scripts..."
+                    echo "Validating SQL init scripts"
                     echo "Build stage complete"
                 '''
             }
@@ -46,7 +45,6 @@ pipeline {
 
         stage('Test') {
             steps {
-                echo "=== TEST STAGE: ${SERVICE_NAME} ==="
                 sh 'echo "Database config validation complete"'
             }
         }
